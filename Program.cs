@@ -1,2 +1,10 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using MaxTunes;
+
+class Program
+{
+    static async Task<int> Main(string[] args)
+    {
+        return await CLI.initializeCLI(args);
+    }
+
+}
