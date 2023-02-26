@@ -42,10 +42,26 @@ namespace MaxTunes
         {
             rootCommand.AddCommand(convertCommand);
 
-            convertCommand.SetHandler((sourcePlaylist, sourceService, destService, supportedServices) =>
+            convertCommand.SetHandler(async (sourcePlaylist, sourceService, destService, supportedServices) =>
             {
                 if (sourcePlaylist != null)
-                    Console.WriteLine($"Source Playlist: {sourcePlaylist}");
+                {
+                    // [TODO: Extract this to a config file]
+                    // [NOTE: Allowing git push for now as it expires in 1 hour]
+                    const string SPOTIFY_OAUTH_TOKEN = "BQBJojtNg_Rsdo5fUOKqkQp-TGfIvZbn8C2H7BYhmjpwDyHq8q2Nplq73po7FSCDZwEn0-33XRCMGTYPBXG00veHXg2TYc6fKjWLxdyRgs1rR9je33haJ-E_JAGaSVQzF9ceq2aAt7-7mGtv5ySw6M7tbd1IOgU2Cl19Tz2zvIP1SDmLbt90gqb2ryPUQcr8Bhyh";
+
+                    try
+                    {
+                        SpotifyPlaylistInfoRetriever spir = new SpotifyPlaylistInfoRetriever(SPOTIFY_OAUTH_TOKEN);
+                        var playlistName = await spir.searchPlaylist(sourcePlaylist);
+                        Console.WriteLine($"Source Playlist: {playlistName}");
+                    }
+                    catch (Exception e)
+                    {
+                        System.Console.WriteLine(e.Message);
+                    }
+                }
+
 
                 if (sourceService != null)
                     Console.WriteLine($"Source Service: {sourceService}");
