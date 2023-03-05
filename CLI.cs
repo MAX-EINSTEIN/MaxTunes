@@ -48,12 +48,13 @@ namespace MaxTunes
                 {
                     // [TODO: Extract this to a config file]
                     // [NOTE: Allowing git push for now as it expires in 1 hour]
-                    const string SPOTIFY_OAUTH_TOKEN = "BQBJojtNg_Rsdo5fUOKqkQp-TGfIvZbn8C2H7BYhmjpwDyHq8q2Nplq73po7FSCDZwEn0-33XRCMGTYPBXG00veHXg2TYc6fKjWLxdyRgs1rR9je33haJ-E_JAGaSVQzF9ceq2aAt7-7mGtv5ySw6M7tbd1IOgU2Cl19Tz2zvIP1SDmLbt90gqb2ryPUQcr8Bhyh";
+                    const string SPOTIFY_OAUTH_TOKEN = "BQBrTAXrs-VWL-12U_FoQI9eew29duVfM2wzUw5PC6cxx51p8t6q7ClXaDbzA8cR7Uyb0lHru8Ob0kjlKrrAOz-CCWv5iBO2pZirQGS5cbjQLmWw-szsTEebD3xYzxVZhU2GG66U2Sf92mZQXpVL3jC13Bd2nSHAZEBD3xD4Nt--7WY3lwvlcnN9pmNPa3YjxM3D";
 
                     try
                     {
-                        SpotifyPlaylistInfoRetriever spir = new SpotifyPlaylistInfoRetriever(SPOTIFY_OAUTH_TOKEN);
-                        var playlistName = await spir.searchPlaylist(sourcePlaylist);
+                        Core.SpotifyPlaylistInfoRetriever sp = new Core.SpotifyPlaylistInfoRetriever(SPOTIFY_OAUTH_TOKEN);
+                        var playlistName = await sp.searchPlaylist(sourcePlaylist);
+
                         Console.WriteLine($"Source Playlist: {playlistName}");
                     }
                     catch (Exception e)

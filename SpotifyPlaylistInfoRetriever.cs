@@ -3,36 +3,45 @@ using SpotifyAPI.Web.Models; //Models for the JSON-responses
 
 namespace MaxTunes
 {
-    internal class SpotifyPlaylistInfoRetriever : PlaylistInfoRetriever
+    namespace Core
     {
-        private SpotifyWebAPI _spotify;
-        public SpotifyPlaylistInfoRetriever(string api_access_token) : base(api_access_token)
+        internal class SpotifyPlaylistInfoRetriever : PlaylistInfoRetriever
         {
-            _spotify = new SpotifyWebAPI()
+            private SpotifyWebAPI _spotify;
+            public SpotifyPlaylistInfoRetriever(string api_access_token) : base(api_access_token)
             {
-                AccessToken = this.ACCESS_TOKEN,
-                TokenType = "Bearer"
-            };
-        }
-
-        public override async Task<string> searchPlaylist(string playlist_id)
-        {
-            try
-            {
-                FullPlaylist playlist = await _spotify.GetPlaylistAsync(playlist_id);
-
-                // [TODO: Remove this line] Logging Tracks Name
-                playlist.Tracks.Items.ForEach(track => Console.WriteLine(track.Track.Name));
-
-                var playlistNameWithCount = $"{playlist.Name} ({playlist.Tracks.Total})";
-                return playlistNameWithCount;
-            }
-            catch (Exception e)
-            {
-                System.Console.WriteLine($"{e.Message}");
+                _spotify = new SpotifyWebAPI()
+                {
+                    AccessToken = this.ACCESS_TOKEN,
+                    TokenType = "Bearer"
+                };
             }
 
-            return "ERROR: Playlist not found";
+            public override async Task<Playlist> searchPlaylist(string playlist_id)
+            {
+                try
+                {
+                    FullPlaylist spotifyPlaylist = await _spotify.GetPlaylistAsync(playlist_id);
+                    playlist = new Playlist(spotifyPlaylist.Name, spotifyPlaylist.Description);
+
+                    spotifyPlaylist.Tracks.Items.ForEach((track) =>
+                    {
+                        var fullTrack = _spotify.GetTrack(track.Track.Id);
+
+                        // [TODO]: Replace placeholder <ARTIST_NAME> with real artist name 
+                        var t = new Track(track.Track.Name, "<ARTIST_NAME>", fullTrack.Album.Name);
+                        playlist.addTrack(t);
+                    });
+
+                    return playlist;
+                }
+                catch (Exception e)
+                {
+                    System.Console.WriteLine($"{e.Message}");
+                }
+
+                throw new System.Exception("ERROR: Playlist not found");
+            }
         }
     }
 }

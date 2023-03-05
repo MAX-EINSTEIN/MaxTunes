@@ -1,10 +1,15 @@
 namespace MaxTunes
 {
-    internal abstract class PlaylistInfoRetriever
+    namespace Core
     {
-        protected string ACCESS_TOKEN;
-        public PlaylistInfoRetriever(string api_access_token) => ACCESS_TOKEN = api_access_token;
+        internal abstract class PlaylistInfoRetriever
+        {
+            protected string ACCESS_TOKEN;
+            protected Playlist? playlist = null;
+            public PlaylistInfoRetriever(string api_access_token) => ACCESS_TOKEN = api_access_token;
 
-        public abstract Task<string> searchPlaylist(string playlist_id);
+            public abstract Task<Playlist> searchPlaylist(string playlist_id);
+        }
     }
+
 }
