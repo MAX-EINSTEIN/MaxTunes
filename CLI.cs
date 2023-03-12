@@ -38,7 +38,7 @@ namespace MaxTunes
         };
 
 
-        private static void setUpHandlersforOptions()
+        private static void setUpHandlersforOptions(string accessToken)
         {
             rootCommand.AddCommand(convertCommand);
 
@@ -46,20 +46,42 @@ namespace MaxTunes
             {
                 if (sourcePlaylist != null)
                 {
-                    // [TODO: Extract this to a config file]
-                    // [NOTE: Allowing git push for now as it expires in 1 hour]
-                    const string SPOTIFY_OAUTH_TOKEN = "BQBrTAXrs-VWL-12U_FoQI9eew29duVfM2wzUw5PC6cxx51p8t6q7ClXaDbzA8cR7Uyb0lHru8Ob0kjlKrrAOz-CCWv5iBO2pZirQGS5cbjQLmWw-szsTEebD3xYzxVZhU2GG66U2Sf92mZQXpVL3jC13Bd2nSHAZEBD3xD4Nt--7WY3lwvlcnN9pmNPa3YjxM3D";
-
                     try
                     {
-                        Core.SpotifyPlaylistInfoRetriever sp = new Core.SpotifyPlaylistInfoRetriever(SPOTIFY_OAUTH_TOKEN);
-                        var playlistName = await sp.searchPlaylist(sourcePlaylist);
+                        Core.SpotifyPlaylistInfoRetriever sp = new Core.SpotifyPlaylistInfoRetriever(accessToken);
 
-                        Console.WriteLine($"Source Playlist: {playlistName}");
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("Fetching playlist and the contained tracks details from Spotify Web API.\nPlease Wait...\n");
+
+                        var playlist = await sp.searchPlaylist(sourcePlaylist);
+
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"SOURCE PLAYLIST: {playlist.Name}, TOTAL SONGS: {playlist.TotalSongs}\n");
+
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.WriteLine("LISTING ALL TRACKS: \n");
+
+                        var tracks = playlist.getTracks();
+                        Boolean toggleColor = true;
+                        foreach (var track in tracks)
+                        {
+                            if (toggleColor) Console.ForegroundColor = ConsoleColor.White;
+                            else Console.ForegroundColor = ConsoleColor.DarkGray;
+
+                            toggleColor = !toggleColor;
+
+                            Console.WriteLine("|  TRACK: {0} \n|  ARTIST: {1} \n|  ALBUM: {2}\n",
+                                                track.Name,
+                                                track.ArtistName,
+                                                track.AlbumName);
+                        }
+
                     }
                     catch (Exception e)
                     {
-                        System.Console.WriteLine(e.Message);
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine(e.Message);
+                        Console.ForegroundColor = ConsoleColor.White;
                     }
                 }
 
@@ -83,9 +105,9 @@ namespace MaxTunes
             }, sourcePlaylistOption, sourceServiceOption, destinationServiceOption, supportedServicesOption);
         }
 
-        public static async Task<int> initializeCLI(string[] args)
+        public static async Task<int> initializeCLI(string[] args, string accessToken)
         {
-            setUpHandlersforOptions();
+            setUpHandlersforOptions(accessToken);
             return await rootCommand.InvokeAsync(args);
         }
     }

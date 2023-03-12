@@ -24,23 +24,36 @@ namespace MaxTunes
                     FullPlaylist spotifyPlaylist = await _spotify.GetPlaylistAsync(playlist_id);
                     playlist = new Playlist(spotifyPlaylist.Name, spotifyPlaylist.Description);
 
-                    spotifyPlaylist.Tracks.Items.ForEach((track) =>
+                    var fetchFullTracksTasks = new List<Task<FullTrack>>();
+                    foreach (var track in spotifyPlaylist.Tracks.Items)
                     {
-                        var fullTrack = _spotify.GetTrack(track.Track.Id);
+                        fetchFullTracksTasks.Add(_spotify.GetTrackAsync(track.Track.Id));
+                    }
 
+                    await Task.WhenAll(fetchFullTracksTasks);
+
+                    foreach (var fullTrackTask in fetchFullTracksTasks)
+                    {
+                        var fullTrack = fullTrackTask.Result;
                         // [TODO]: Replace placeholder <ARTIST_NAME> with real artist name 
-                        var t = new Track(track.Track.Name, "<ARTIST_NAME>", fullTrack.Album.Name);
-                        playlist.addTrack(t);
-                    });
+                        var track = new Track(fullTrack.Name, "<ARTIST_NAME>", fullTrack.Album.Name);
+                        playlist.addTrack(track);
+                    }
 
                     return playlist;
                 }
                 catch (Exception e)
                 {
-                    System.Console.WriteLine($"{e.Message}");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"ERROR: {e.Message}");
+
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.WriteLine("INFO: Possible Fix - Refetch the access token.");
+
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
 
-                throw new System.Exception("ERROR: Playlist not found");
+                throw new System.Exception("ERROR: Playlist not found. Please enter a valid public playlist id.");
             }
         }
     }
